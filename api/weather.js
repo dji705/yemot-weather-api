@@ -11,7 +11,7 @@ function clean(value) {
 
 function yemotRead(text, inputName = "town", min = 1, max = 30, timeout = 7) {
   // Yemot read output: read=<spoken text>=<variable>,no,min,max,timeout,Digits,no,no,,,1,Ok
-  return `read=${text}=${inputName},no,${min},${max},${timeout},Digits,no,no,,,1,Ok`;
+  return `read=${text}=${inputName},no,${min},${max},${timeout},HebrewKeyboard,no,no,,,1,Ok`;
 }
 
 function say(text) {
@@ -51,7 +51,7 @@ export default async function handler(req, res) {
 
   if (!town) {
     res.statusCode = 200;
-    return res.end(yemotRead("לשמיעת מזג האוויר, הקישו את שם היישוב וסיימו בסולמית", "town", 1, 30, 7));
+    return res.end(yemotRead("לשמיעת מזג האוויר, הקלידו את שם היישוב במקלדת העברית וסיימו בסולמית", "town", 1, 30, 7));
   }
 
   try {
