@@ -10,12 +10,12 @@ function clean(value) {
 }
 
 function yemotRead(text, inputName = "town", min = 1, max = 30, timeout = 7) {
-  // Yemot read output: read=<spoken text>=<variable>,no,min,max,timeout,Digits,no,no,,,1,Ok
-  return `read=${text}=${inputName},no,*,1,${timeout},HebrewKeyboard,no,no,,,1,Ok`;
+  // Hebrew text input: the sixth read field is HebrewKeyboard.
+  return `read=t-${text}=${inputName},,,,,HebrewKeyboard`;
 }
 
 function say(text) {
-  return `read=${text}.\n`;
+  return `read=t-${text}`;
 }
 
 function weatherDescription(code) {
