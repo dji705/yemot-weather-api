@@ -80,7 +80,7 @@ export default async function handler(req, res) {
   let town = clean(url.searchParams.get("town") || url.searchParams.get("city"));
   const choice = clean(url.searchParams.get("town_choice") || url.searchParams.get("wm_nav") || url.searchParams.get("ApiPhoneInput") || url.searchParams.get("val"));
 
-  if (!town && /^\\d{1,2}$/.test(choice)) {
+  if (!town && /^\d{1,2}$/.test(choice)) {
     const index = Number(choice) - 1;
     if (index >= 0 && index < TOWNS.length) town = TOWNS[index];
     else {
