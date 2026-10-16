@@ -9,9 +9,39 @@ function clean(value) {
   return String(value || "").trim().replace(/[<>\r\n]/g, "").slice(0, 80);
 }
 
-function yemotRead(text, inputName = "town", min = 1, max = 30, timeout = 7) {
-  // Hebrew text input: the sixth read field is HebrewKeyboard.
-  return `read=t-${text}=${inputName},,,,,HebrewKeyboard`;
+const TOWNS = [
+  "ירושלים",
+  "בני ברק",
+  "מודיעין עילית",
+  "ביתר עילית",
+  "אלעד",
+  "בית שמש",
+  "רכסים",
+  "קריית יערים",
+  "עמנואל",
+  "אשדוד",
+  "נתיבות",
+  "אופקים",
+  "ערד",
+  "טבריה",
+  "צפת",
+  "פתח תקווה",
+  "רחובות",
+  "חיפה",
+  "תל ציון",
+  "אחיסמך",
+  "תפרח",
+  "קוממיות",
+  "יסודות",
+  "יד בנימין",
+  "חפץ חיים",
+  "כפר חב״ד",
+  "חצור הגלילית"
+];
+
+function townMenu() {
+  const choices = TOWNS.map((town, index) => `${String(index + 1).padStart(2, "0")} ${town}`).join(". ");
+  return `read=t-לבחירת יישוב, הקישו את המספר שלו בין אחת לשתיים ספרות וסיימו בסולמית. ${choices}=town_choice,no,1,2,7,Digits,no,no,,,1,Ok`;
 }
 
 function say(text) {
@@ -47,11 +77,21 @@ export default async function handler(req, res) {
 
   const url = new URL(req.url, "https://example.invalid");
   // Accept common parameter names so the endpoint can be connected flexibly in Yemot.
-  const town = clean(url.searchParams.get("town") || url.searchParams.get("city") || url.searchParams.get("ApiPhoneInput") || url.searchParams.get("val"));
+  let town = clean(url.searchParams.get("town") || url.searchParams.get("city"));
+  const choice = clean(url.searchParams.get("town_choice") || url.searchParams.get("wm_nav") || url.searchParams.get("ApiPhoneInput") || url.searchParams.get("val"));
+
+  if (!town && /^\\d{1,2}$/.test(choice)) {
+    const index = Number(choice) - 1;
+    if (index >= 0 && index < TOWNS.length) town = TOWNS[index];
+    else {
+      res.statusCode = 200;
+      return res.end(say("הבחירה אינה תקינה. נסו שוב"));
+    }
+  }
 
   if (!town) {
     res.statusCode = 200;
-    return res.end(yemotRead("לשמיעת מזג האוויר, הקלידו את שם היישוב במקלדת העברית וסיימו בסולמית", "town", 1, 30, 7));
+    return res.end(townMenu());
   }
 
   try {
