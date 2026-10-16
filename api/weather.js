@@ -41,7 +41,7 @@ const TOWNS = [
 
 function townMenu() {
   const choices = TOWNS.map((town, index) => `${String(index + 1).padStart(2, "0")} ${town}`).join(". ");
-  return `read=t-לבחירת יישוב, הקישו את המספר שלו בין אחת לשתיים ספרות וסיימו בסולמית. ${choices}=town_choice,no,1,2,7,Digits,no,no,,,1,Ok`;
+  return `read=t-לבחירת יישוב, הקישו את המספר שלו בין אחת לשתיים ספרות וסיימו בסולמית. ${choices}=wm_nav,no,1,2,5,Digits,no,no,,,1,Ok`;
 }
 
 function say(text) {
@@ -78,7 +78,7 @@ export default async function handler(req, res) {
   const url = new URL(req.url, "https://example.invalid");
   // Accept common parameter names so the endpoint can be connected flexibly in Yemot.
   let town = clean(url.searchParams.get("town") || url.searchParams.get("city"));
-  const choice = clean(url.searchParams.get("town_choice") || url.searchParams.get("wm_nav") || url.searchParams.get("ApiPhoneInput") || url.searchParams.get("val"));
+  const choice = clean(url.searchParams.get("wm_nav") || url.searchParams.get("town_choice") || url.searchParams.get("ApiPhoneInput") || url.searchParams.get("val"));
 
   if (!town && /^\d{1,2}$/.test(choice)) {
     const index = Number(choice) - 1;
