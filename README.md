@@ -1,29 +1,64 @@
-# Yemot Weather API
+# שירות מזג אוויר לימות המשיח
 
-API for a Yemot HaMashiach IVR weather branch. Uses Open-Meteo geocoding and forecast services; no API key is required.
+שירות API לקבלת מזג אוויר ולהשמעת התחזית במערכת הטלפונית של ימות המשיח.
 
-## Endpoint
+המערכת משתמשת בשירותי **Open-Meteo** לאיתור יישובים ולקבלת נתוני מזג אוויר. אין צורך במפתח API.
 
-After deploying on Vercel:
+## מה השירות עושה?
 
-`https://YOUR-PROJECT.vercel.app/api/weather?town=ירושלים`
+- מאפשר לבחור יישוב מתוך רשימת יישובים בעברית.
+- מקבל גם שם יישוב בפרמטר `town` או `city`.
+- מקריא את מצב מזג האוויר, הטמפרטורה, התחושה, הרוח והלחות.
+- מוסיף המלצת לבוש בהתאם למזג האוויר: חולצה ארוכה, סוודר, ז'קט, מעיל, חליפה, נעליים סגורות ומטרייה.
+- מתאים את הניסוח לתנאים בפועל, כדי שההודעה תישמע טבעית ונעימה ולא כמו רשימת נתונים יבשה.
+- מחזיר פלט בפורמט `read=` המתאים לחיבור לימות המשיח.
 
-The endpoint returns Yemot-compatible `read=` output in Hebrew.
+## כתובת השירות
 
-## Query parameters
+לאחר פריסה ב־Vercel:
 
-- `town` — town name in Hebrew or English.
-- `city` — alternative to `town`.
-- `ApiPhoneInput` or `val` — accepted as alternative parameter names for integrations that pass input under those names.
+```
+https://YOUR-PROJECT.vercel.app/api/weather?town=ירושלים
+```
 
-If no town parameter is supplied, the API returns a Yemot `read=` prompt requesting the town name.
+אפשר להשתמש גם בפרמטר:
 
-## Deploy
+- `town` — שם היישוב בעברית או באנגלית.
+- `city` — שם חלופי ליישוב.
+- `wm_nav`, `town_choice`, `ApiPhoneInput` או `val` — ערך הבחירה המספרית מתוך תפריט היישובים.
 
-1. Import this repository into Vercel.
-2. Deploy with the default settings (Node.js 18 or newer).
-3. Test: `/api/weather?town=ירושלים`
+אם לא נשלח שם יישוב או מספר בחירה תקין, השירות מחזיר תפריט לבחירת יישוב.
 
-## Important note about keypad input
+## דוגמה להקראה
 
-The endpoint accepts a town name passed as text. Whether callers can enter Hebrew letters directly from a phone keypad depends on the input method configured in Yemot. Configure Yemot to pass the collected town text in the `town` parameter; a normal numeric DTMF value alone cannot identify a Hebrew town name.
+לדוגמה, ביום קריר השירות עשוי לומר:
+
+> שלום וברוכים הבאים לשירות מזג האוויר. מזג האוויר בירושלים כעת קריר. הטמפרטורה היא 12 מעלות, אך התחושה קרה יותר. מומלץ לצאת עם חולצה ארוכה, סוודר או ז'קט, ואפשר להוסיף מעיל אם יוצאים לזמן ממושך. שיהיה לכם יום נעים ובריא!
+
+ההמלצה משתנה בהתאם לטמפרטורה, לתחושת הקור, לרוח ולמשקעים.
+
+## פריסה ב־Vercel
+
+1. נכנסים ל־Vercel ובוחרים **Add New Project**.
+2. מייבאים את המאגר הזה מ־GitHub.
+3. משאירים את הגדרות ברירת המחדל.
+4. מוודאים שהפרויקט רץ עם Node.js 18 ומעלה.
+5. לוחצים **Deploy**.
+6. בודקים את הכתובת עם הדוגמה שלמעלה.
+
+## חיבור לימות המשיח
+
+יש להגדיר את השלוחה כך שתשלח לכתובת ה־API את שם היישוב או את מספר הבחירה שנקלט בתפריט. השירות מחזיר טקסט בפורמט `read=` להקראה במערכת.
+
+**חשוב:** הגרסה הנוכחית מבקשת בחירת יישוב בכל פעם שלא נשלח לה יישוב בבקשה. שמירת עיר לפי מספר טלפון וזיהוי אוטומטי של מתקשר הם שדרוג נפרד שעדיין דורש חיבור למסד נתונים.
+
+## טכנולוגיות
+
+- Node.js
+- Vercel Functions
+- Open-Meteo Geocoding API
+- Open-Meteo Forecast API
+
+## פרטיות
+
+השירות הנוכחי אינו שומר פרופיל משתמש או עיר מועדפת. אין לשלוח אליו מידע אישי שאינו נדרש לקבלת התחזית.
