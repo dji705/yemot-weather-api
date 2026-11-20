@@ -9,6 +9,30 @@ function clean(value) {
   return String(value || "").trim().replace(/[<>\r\n]/g, "").slice(0, 80);
 }
 
+function cleanPhone(value) {
+  const phone = String(value || "").replace(/[^0-9]/g, "");
+  return phone.length >= 7 && phone.length <= 15 ? phone : "";
+}
+
+async function cityStore(action, phone, town = "") {
+  const endpoint = process.env.GOOGLE_SHEETS_WEB_APP_URL;
+  const secret = process.env.GOOGLE_SHEETS_SECRET;
+  if (!endpoint || !secret || !phone) return null;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, phone, town, secret })
+    });
+    if (!response.ok) return null;
+    const result = await response.json();
+    return result && result.ok ? result : null;
+  } catch {
+    return null;
+  }
+}
+
 const TOWNS = [
   "ירושלים",
   "בני ברק",
@@ -170,6 +194,7 @@ export default async function handler(req, res) {
 
   const url = new URL(req.url, "https://example.invalid");
   let town = clean(url.searchParams.get("town") || url.searchParams.get("city"));
+  const phone = cleanPhone(url.searchParams.get("ApiPhone"));
   const choice = clean(
     url.searchParams.get("wm_nav") ||
     url.searchParams.get("town_choice") ||
@@ -177,18 +202,32 @@ export default async function handler(req, res) {
     url.searchParams.get("val")
   );
 
+  // בחירה מפורשת של המשתמש גוברת על העיר השמורה.
   if (!town && /^\d{1,2}$/.test(choice)) {
     const index = Number(choice) - 1;
-    if (index >= 0 && index < TOWNS.length) town = TOWNS[index];
-    else {
+    if (index >= 0 && index < TOWNS.length) {
+      town = TOWNS[index];
+      if (phone) await cityStore("set", phone, town);
+    } else {
       res.statusCode = 200;
       return res.end(say("הבחירה שהקשתם אינה מופיעה ברשימה. אנא נסו לבחור שוב"));
     }
   }
 
+  // אם לא נבחרה עיר בשיחה הנוכחית, ננסה לטעון את העיר המועדפת לפי ApiPhone.
+  if (!town && phone) {
+    const saved = await cityStore("get", phone);
+    if (saved?.town) town = clean(saved.town);
+  }
+
   if (!town) {
     res.statusCode = 200;
     return res.end(townMenu());
+  }
+
+  // גם כתובת town/city מפורשת מעדכנת את העיר המועדפת של המתקשר.
+  if (phone && !/^\d{1,2}$/.test(choice)) {
+    await cityStore("set", phone, town);
   }
 
   try {
